@@ -25,3 +25,7 @@ Desktop.ini
 *.log
 *.tmp
 *.cache
+
+# Environment files (DO NOT COMMIT SECRETS)
+.env
+.env.local
