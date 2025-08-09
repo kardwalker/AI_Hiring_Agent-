@@ -1,0 +1,51 @@
+{
+  "resume_file": "d:\\Work\\Virtual_house\\Virtual__house\\AgentForce_Hackthon\\agents\\Resume_pdf_file\\Rukhsar_Resume.pdf",
+  "processing_timestamp": "65826.328",
+  "github_links_found": [],
+  "github_profiles": {},
+  "github_repositories": {},
+  "analysis_summary": {},
+  "contact_information": {
+    "section": "contact_info",
+    "doc_type": "resume",
+    "source": "d:\\Work\\Virtual_house\\Virtual__house\\AgentForce_Hackthon\\agents\\Resume_pdf_file\\Rukhsar_Resume.pdf",
+    "emails": [
+      "21je0787@iitism.ac.in"
+    ],
+    "phones": [
+      "883-911-8538",
+      "39118538"
+    ],
+    "linkedin": [
+      "Rukhsar"
+    ],
+    "github_profiles": [],
+    "github_repos": [],
+    "hyperlinks": {
+      "github_links": [],
+      "linkedin_links": [
+        "https://www.linkedin.com/in/rukhsar-524734228/"
+      ],
+      "research_publication_links": [],
+      "certification_links": [],
+      "social_media_links": [],
+      "other_links": [
+        "mailto:21je0787@iitism.ac.in",
+        "https://drive.google.com/drive/folders/1b6SKCNMHNyHgnhfQ7MrGOxduuVhtUYYt?usp=sharing"
+      ]
+    }
+  },
+  "resume_sections": {
+    "summary": 14,
+    "experience": 1,
+    "education": 1,
+    "skills": 1,
+    "projects": 13,
+    "certifications": 1,
+    "research": 14,
+    "social": 5,
+    "achievements": 2,
+    "workshops": 9
+  },
+  "errors": []
+}
