@@ -1,0 +1,35 @@
+John Doe
+Software Engineer
+john.doe@email.com
+(555) 123-4567
+linkedin.com/in/johndoe
+github.com/johndoe
+
+SUMMARY
+Experienced software engineer with 5 years in full-stack development.
+
+EXPERIENCE
+Senior Software Engineer - Tech Corp (2020-2024)
+- Developed web applications using React and Node.js
+- Led a team of 3 developers
+- Implemented CI/CD pipelines
+
+Software Engineer - StartupXYZ (2018-2020)
+- Built mobile applications using React Native
+- Worked with REST APIs and databases
+
+EDUCATION
+Bachelor of Science in Computer Science
+University of Technology (2014-2018)
+
+SKILLS
+Programming Languages: JavaScript, Python, Java, TypeScript
+Frameworks: React, Node.js, Express, Django
+Databases: MySQL, PostgreSQL, MongoDB
+Tools: Git, Docker, Jenkins, AWS
+
+PROJECTS
+E-commerce Platform
+- Built full-stack e-commerce solution
+- Technologies: React, Node.js, PostgreSQL
+- Repository: github.com/johndoe/ecommerce-platform
