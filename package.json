@@ -1,0 +1,47 @@
+{
+  "name": "ai-resume-analyzer",
+  "version": "2.0.0",
+  "description": "AI-powered resume analysis web application with multi-agent architecture",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"cd backend && python main.py\" \"cd frontend && npm run dev\"",
+    "build": "cd frontend && npm run build",
+    "start": "cd backend && python main.py",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install:backend": "cd backend && pip install -r requirements.txt",
+    "install:frontend": "cd frontend && npm install",
+    "install:all": "npm run install:backend && npm run install:frontend"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kardwalker/AI_Hiring_Agent-.git"
+  },
+  "keywords": [
+    "ai",
+    "resume",
+    "analyzer",
+    "hiring",
+    "fastapi",
+    "react",
+    "langchain",
+    "langgraph",
+    "machine-learning",
+    "nlp"
+  ],
+  "author": "Aman Yadav",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kardwalker/AI_Hiring_Agent-/issues"
+  },
+  "homepage": "https://github.com/kardwalker/AI_Hiring_Agent-#readme",
+  "engines": {
+    "node": ">=18.0.0",
+    "python": ">=3.8.0"
+  },
+  "workspaces": [
+    "frontend"
+  ],
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

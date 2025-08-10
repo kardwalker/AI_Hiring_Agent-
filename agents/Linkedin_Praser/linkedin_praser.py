@@ -169,9 +169,14 @@ class LinkedInProfileScraper:
         if 'error' not in basic_result:
             return basic_result
         
-        # Final fallback to mock data
-        logger.warning("⚠️ All scraping methods failed. Using demonstration data...")
-        return await self.create_mock_linkedin_data(linkedin_url)
+        # Return access denied instead of mock data
+        logger.warning("⚠️ All scraping methods failed. LinkedIn access denied.")
+        return {
+            'error': 'LinkedIn access denied',
+            'message': 'Unable to parse LinkedIn profile due to access restrictions',
+            'url': linkedin_url,
+            'status': 'access_denied'
+        }
     
     def _process_brightdata_result(self, brightdata_result: Dict[str, Any]) -> Dict[str, Any]:
         """Process and normalize BrightData scraping result."""
@@ -462,10 +467,17 @@ async def analyze_linkedin_profile(linkedin_url: str = None, resume_file_path: s
     # Attempt to scrape profile (will likely be limited)
     profile_data = await scraper.scrape_linkedin_profile_enhanced(primary_linkedin)
     
-    # If scraping fails or is limited, use mock data for demonstration
+    # If scraping fails or is limited, return access denied message
     if profile_data.get('error') or profile_data.get('status') == 'partially_extracted':
-        print(f"⚠️  Limited scraping access. Using demonstration data...")
-        profile_data = await scraper.create_mock_linkedin_data(primary_linkedin)
+        print(f"⚠️  LinkedIn access denied. Cannot parse profile due to access restrictions.")
+        result = {
+            'error': 'LinkedIn access denied',
+            'message': 'Cannot parse LinkedIn profile due to access restrictions',
+            'url': primary_linkedin,
+            'profile_data': None,
+            'summary': 'LinkedIn profile analysis unavailable due to access restrictions.'
+        }
+        return result
     
     # Generate comprehensive summary
     print(f"\n📊 GENERATING PROFESSIONAL SUMMARY...")

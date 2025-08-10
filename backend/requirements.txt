@@ -1,0 +1,20 @@
+# Backend Dependencies for AI Resume Analysis Agent
+
+# FastAPI and web server
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+
+# HTTP client for external requests (compatible with chromadb)
+httpx>=0.27.0
+
+# File processing
+python-docx==1.1.0
+PyMuPDF==1.23.8
+
+# Already included in main requirements
+# langchain-openai
+# langchain-community
+# langchain-chroma
+# chromadb
+# faiss-cpu
