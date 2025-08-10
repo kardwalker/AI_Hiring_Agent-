@@ -32,6 +32,18 @@ Desktop.ini
 *.cache
 temp_uploads/
 
+# Local resume uploads / sample resumes (avoid committing personal data)
+agents/Resume_pdf_file/**
+!agents/Resume_pdf_file/README.md
+
+# Generated per-user persisted vectorstore dirs
+resume_*/
+
+# Local test scripts not intended for repo (keep core tests separate)
+test_*.py
+demo_resume_parsing.py
+run_agent_demo.py
+
 # Environment files (DO NOT COMMIT SECRETS)
 .env
 .env.local
