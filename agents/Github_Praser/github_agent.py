@@ -2,6 +2,7 @@ import sys
 import os
 import asyncio
 import json
+from datetime import datetime
 from typing import Dict, Any, List, Optional
 from dotenv import load_dotenv
 load_dotenv()
@@ -124,6 +125,112 @@ def save_github_analysis_to_json(analysis_result: Dict[str, Any], output_file: s
         return ""
 
 
+def generate_detailed_report(analysis_result: Dict[str, Any]) -> str:
+    """
+    Generate a detailed text report of the GitHub analysis.
+    
+    Args:
+        analysis_result: The analysis result dictionary
+    
+    Returns:
+        Formatted text report
+    """
+    report_lines = []
+    report_lines.append("🔍 DETAILED GITHUB ANALYSIS REPORT")
+    report_lines.append("=" * 60)
+    report_lines.append(f"Resume File: {analysis_result.get('resume_file', 'N/A')}")
+    report_lines.append(f"Analysis Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    report_lines.append("")
+    
+    # Summary
+    summary = analysis_result.get('analysis_summary', {})
+    report_lines.append("📊 SUMMARY:")
+    report_lines.append(f"• Total GitHub links found: {summary.get('total_links', 0)}")
+    report_lines.append(f"• Profiles analyzed: {summary.get('profiles_found', 0)}")
+    report_lines.append(f"• Repositories analyzed: {summary.get('repositories_found', 0)}")
+    report_lines.append(f"• Unique users: {summary.get('unique_users', 0)}")
+    report_lines.append("")
+    
+    # Profiles
+    profiles = analysis_result.get('github_profiles', {})
+    if profiles:
+        report_lines.append("👤 GITHUB PROFILES:")
+        for username, profile in profiles.items():
+            report_lines.append(f"\n📋 {username}")
+            report_lines.append(f"   Name: {profile.get('name', 'N/A')}")
+            report_lines.append(f"   Public Repos: {profile.get('public_repos', 0)}")
+            report_lines.append(f"   Followers: {profile.get('followers', 0)}")
+            report_lines.append(f"   Following: {profile.get('following', 0)}")
+            
+            if profile.get('bio'):
+                report_lines.append(f"   Bio: {profile['bio']}")
+            if profile.get('company'):
+                report_lines.append(f"   Company: {profile['company']}")
+            if profile.get('location'):
+                report_lines.append(f"   Location: {profile['location']}")
+    
+    # Repositories
+    repositories = analysis_result.get('github_repositories', {})
+    if repositories:
+        report_lines.append("\n📂 REPOSITORIES:")
+        for repo_name, repo in repositories.items():
+            report_lines.append(f"\n📁 {repo_name}")
+            
+            if repo.get('description'):
+                report_lines.append(f"   Description: {repo['description']}")
+            else:
+                report_lines.append(f"   Description: No description available")
+            
+            report_lines.append(f"   Language: {repo.get('language', 'N/A')}")
+            report_lines.append(f"   Stars: {repo.get('stars', 0)}")
+            report_lines.append(f"   Forks: {repo.get('forks', 0)}")
+            
+            if repo.get('topics'):
+                report_lines.append(f"   Topics: {', '.join(repo['topics'])}")
+            
+            report_lines.append(f"   Last Updated: {repo.get('updated_at', 'N/A')}")
+            
+            if repo.get('homepage'):
+                report_lines.append(f"   Homepage: {repo['homepage']}")
+    
+    # Errors
+    errors = analysis_result.get('errors', [])
+    if errors:
+        report_lines.append("\n⚠️ ERRORS ENCOUNTERED:")
+        for error in errors:
+            report_lines.append(f"   • {error}")
+    
+    report_lines.append("\n" + "=" * 60)
+    report_lines.append("End of Report")
+    
+    return "\n".join(report_lines)
+    """
+    Save GitHub analysis results to a JSON file.
+    
+    Args:
+        analysis_result: The analysis result dictionary
+        output_file: Optional output file path
+    
+    Returns:
+        Path to the saved file
+    """
+    if output_file is None:
+        resume_file = analysis_result.get('resume_file', 'resume')
+        base_name = os.path.splitext(os.path.basename(resume_file))[0]
+        output_file = f"{base_name}_github_analysis.json"
+    
+    try:
+        with open(output_file, 'w', encoding='utf-8') as f:
+            json.dump(analysis_result, f, indent=2, ensure_ascii=False, default=str)
+        
+        print(f"💾 GitHub analysis saved to: {output_file}")
+        return output_file
+        
+    except Exception as e:
+        print(f"❌ Error saving analysis: {e}")
+        return ""
+
+
 async def main():
     """
     Interactive GitHub analysis from resume.
@@ -156,7 +263,7 @@ async def main():
         return
     
     # Display results summary
-    print(f"\n📊 ANALYSIS COMPLETE")
+    print(f"\n📊 GITHUB ANALYSIS SUMMARY")
     print("="*50)
     
     summary = result.get('analysis_summary', {})
@@ -165,12 +272,45 @@ async def main():
     print(f"✓ Repositories analyzed: {summary.get('repositories_found', 0)}")
     print(f"✓ Unique users: {summary.get('unique_users', 0)}")
     
+    # Show any errors
+    errors = result.get('errors', [])
+    if errors:
+        print(f"⚠️  Errors encountered: {len(errors)}")
+        for error in errors[:3]:  # Show first 3 errors
+            print(f"   • {error}")
+    else:
+        print("✅ No errors encountered")
+    
     # Show GitHub profiles
     profiles = result.get('github_profiles', {})
     if profiles:
         print(f"\n👤 GITHUB PROFILES FOUND:")
         for username, profile in profiles.items():
-            print(f"  • {username}: {profile.get('name', 'N/A')} | {profile.get('public_repos', 0)} repos | {profile.get('followers', 0)} followers")
+            name = profile.get('name', 'N/A')
+            public_repos = profile.get('public_repos', 0)
+            followers = profile.get('followers', 0)
+            following = profile.get('following', 0)
+            bio = profile.get('bio', '')
+            
+            print(f"  📋 {username}")
+            if name != 'N/A':
+                print(f"      Name: {name}")
+            print(f"      Public Repos: {public_repos}")
+            print(f"      Followers: {followers} | Following: {following}")
+            
+            if bio:
+                # Truncate long bios
+                if len(bio) > 100:
+                    bio = bio[:100] + "..."
+                print(f"      Bio: {bio}")
+            
+            # Show company and location if available
+            if profile.get('company'):
+                print(f"      Company: {profile['company']}")
+            if profile.get('location'):
+                print(f"      Location: {profile['location']}")
+            
+            print()  # Add spacing between profiles
     
     # Show repositories
     repositories = result.get('github_repositories', {})
@@ -179,7 +319,29 @@ async def main():
         for repo_name, repo in repositories.items():
             language = repo.get('language', 'N/A')
             stars = repo.get('stars', 0)
+            description = repo.get('description', '')
+            
+            # Display basic repo info
             print(f"  • {repo_name} ({language}) - ⭐{stars}")
+            
+            # Display description if available
+            if description:
+                # Truncate long descriptions
+                if len(description) > 80:
+                    description = description[:80] + "..."
+                print(f"    📝 {description}")
+            else:
+                print(f"    📝 No description available")
+            
+            # Show additional details if available
+            if repo.get('forks', 0) > 0:
+                print(f"    🍴 {repo.get('forks', 0)} forks")
+            
+            if repo.get('topics'):
+                topics = repo['topics'][:3]  # Show first 3 topics
+                print(f"    🏷️  Topics: {', '.join(topics)}")
+            
+            print()  # Add spacing between repos
     
     # Ask if user wants to save results
     save_choice = input(f"\n💾 Save analysis to JSON file? (y/n): ").strip().lower()
@@ -187,6 +349,28 @@ async def main():
         output_file = save_github_analysis_to_json(result)
         if output_file:
             print(f"✅ Analysis saved successfully!")
+    
+    # Ask if user wants detailed report
+    report_choice = input(f"📄 Generate detailed text report? (y/n): ").strip().lower()
+    if report_choice in ['y', 'yes']:
+        detailed_report = generate_detailed_report(result)
+        
+        # Save to file
+        resume_file = result.get('resume_file', 'resume')
+        base_name = os.path.splitext(os.path.basename(resume_file))[0]
+        report_file = f"{base_name}_github_detailed_report.txt"
+        
+        try:
+            with open(report_file, 'w', encoding='utf-8') as f:
+                f.write(detailed_report)
+            print(f"📄 Detailed report saved to: {report_file}")
+        except Exception as e:
+            print(f"❌ Error saving report: {e}")
+            
+        # Ask if user wants to view it now
+        view_choice = input(f"👀 View detailed report now? (y/n): ").strip().lower()
+        if view_choice in ['y', 'yes']:
+            print("\n" + detailed_report)
     
     print(f"\n✅ GitHub analysis complete!")
 

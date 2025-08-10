@@ -12,6 +12,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain.schema import Document
 from langchain_community.vectorstores import FAISS
 import re
+from langchain_chroma import Chroma
 import numpy as np
 import argparse
 import sys
@@ -35,7 +36,7 @@ load_dotenv()
 # Azure OpenAI configuration
 AZURE_OPENAI_API_KEY = os.getenv("AZURE_API_KEY") 
 AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_ENDPOINT") 
-AZURE_EMBEDDING_DEPLOYMENT = os.getenv("AZURE_EMBEDDING_DEPLOYMENT", "text-embedding-ada-002")
+AZURE_EMBEDDING_DEPLOYMENT = os.getenv("Embedding_api_key", "text-embedding-ada-002")
 
 if not AZURE_OPENAI_API_KEY or not AZURE_OPENAI_ENDPOINT:
     logger.error("❌ Azure OpenAI credentials missing. Set AZURE_OPENAI_API_KEY and AZURE_OPENAI_ENDPOINT in .env")
@@ -625,9 +626,10 @@ def get_resume_file_from_user() -> Optional[str]:
                         print(f"      - {pdf_file}")
             continue
 
-
+"""
 async def demo_resume_search(result: Dict[str, Any]):
-    """Demonstrate searching functionality with the processed resume."""
+    """#Demonstrate searching functionality with the processed resume.
+"""
     if not result.get('vectorstore'):
         print("⚠️  Vector search not available (no embeddings created)")
         return
@@ -657,7 +659,8 @@ async def demo_resume_search(result: Dict[str, Any]):
 
 
 def validate_installation():
-    """Check if all required packages are installed."""
+    """#Check if all required packages are installed.
+"""
     print("🔧 CHECKING INSTALLATION...")
     print("-" * 30)
     
@@ -684,13 +687,13 @@ def validate_installation():
     print()
     return all_good
 
-
+"""
 if __name__ == "__main__":
     import argparse
     import sys
     
     # Validate installation first
-    validate_installation()
+    # validate_installation()
     
     parser = argparse.ArgumentParser(
         description="Advanced Resume Processor with Hyperlink Extraction and Vector Embeddings",
@@ -814,6 +817,7 @@ class GitHubLinkParser:
         ]
         
         # Check for repository patterns first (more specific)
+        # Check for repository patterns first (more specific)
         for pattern in repo_patterns:
             match = re.search(pattern, url, re.IGNORECASE)
             if match:
@@ -829,8 +833,6 @@ class GitHubLinkParser:
                 github_info['username'] = match.group(1)
                 github_info['url_type'] = 'profile'
                 return github_info
-        
-        return github_info
     
     async def fetch_github_profile(self, username: str) -> Dict[str, Any]:
         """Fetch GitHub profile information."""

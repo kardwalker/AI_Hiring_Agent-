@@ -32,6 +32,10 @@ logger = logging.getLogger(__name__)
 AZURE_OPENAI_API_KEY = os.getenv("AZURE_API_KEY") 
 AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_ENDPOINT") 
 
+# BrightData WebScraper API configuration
+BRIGHTDATA_API_TOKEN = os.getenv("BRIGHTDATA_API_TOKEN")
+BRIGHTDATA_API_ENDPOINT = os.getenv("BRIGHTDATA_API_ENDPOINT", "https://api.brightdata.com") 
+
 # Initialize Azure OpenAI model for summarization
 try:
     chat_model = AzureChatOpenAI(
@@ -48,10 +52,91 @@ except Exception as e:
     chat_model = None
 
 
-class LinkedInProfileScraper:
-    """LinkedIn profile scraper and analyzer."""
+class BrightDataScraper:
+    """BrightData WebScraper API implementation for LinkedIn scraping."""
     
     def __init__(self):
+        self.api_token = BRIGHTDATA_API_TOKEN
+        self.endpoint = BRIGHTDATA_API_ENDPOINT
+        self.headers = {
+            'Authorization': f'Bearer {self.api_token}',
+            'Content-Type': 'application/json'
+        }
+    
+    async def scrape_linkedin_profile(self, linkedin_url: str) -> Dict[str, Any]:
+        """Scrape LinkedIn profile using BrightData API."""
+        if not self.api_token:
+            logger.warning("BrightData API token not configured, falling back to basic scraping")
+            return {'error': 'BrightData API token not configured'}
+        
+        try:
+            # BrightData WebScraper API request
+            scrape_request = {
+                "url": linkedin_url,
+                "format": "json",
+                "wait_for": "networkidle",
+                "extract": {
+                    "name": {"selector": "h1", "type": "text"},
+                    "headline": {"selector": ".text-body-medium", "type": "text"},
+                    "location": {"selector": ".text-body-small.inline.t-black--light", "type": "text"},
+                    "connections": {"selector": ".link-without-visited-state", "type": "text"},
+                    "about": {"selector": ".pv-about__summary-text", "type": "text"},
+                    "experience": {
+                        "selector": ".pv-entity__summary-info",
+                        "type": "list",
+                        "extract": {
+                            "title": {"selector": "h3", "type": "text"},
+                            "company": {"selector": ".pv-entity__secondary-title", "type": "text"},
+                            "duration": {"selector": ".pv-entity__bullet-item", "type": "text"}
+                        }
+                    },
+                    "education": {
+                        "selector": ".pv-education-entity",
+                        "type": "list", 
+                        "extract": {
+                            "school": {"selector": "h3", "type": "text"},
+                            "degree": {"selector": ".pv-entity__secondary-title", "type": "text"},
+                            "field": {"selector": ".pv-entity__comma-item", "type": "text"}
+                        }
+                    },
+                    "skills": {
+                        "selector": ".pv-skill-category-entity__name",
+                        "type": "list"
+                    }
+                }
+            }
+            
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                response = await client.post(
+                    f"{self.endpoint}/webscraperapi/request",
+                    headers=self.headers,
+                    json=scrape_request
+                )
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    logger.info("✅ Successfully scraped LinkedIn profile using BrightData")
+                    return {
+                        'url': linkedin_url,
+                        'data': result,
+                        'extracted_at': datetime.now().isoformat(),
+                        'status': 'success',
+                        'method': 'brightdata_api'
+                    }
+                else:
+                    logger.error(f"BrightData API error: {response.status_code}")
+                    return {'error': f'BrightData API error: {response.status_code}'}
+                    
+        except Exception as e:
+            logger.error(f"Error with BrightData scraping: {e}")
+            return {'error': f'BrightData scraping failed: {str(e)}'}
+
+
+class LinkedInProfileScraper:
+    """LinkedIn profile scraper and analyzer with BrightData integration."""
+    
+    def __init__(self):
+        self.brightdata_scraper = BrightDataScraper()
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
@@ -59,6 +144,62 @@ class LinkedInProfileScraper:
             'Accept-Encoding': 'gzip, deflate',
             'Connection': 'keep-alive',
         }
+    
+    async def scrape_linkedin_profile_enhanced(self, linkedin_url: str) -> Dict[str, Any]:
+        """
+        Enhanced LinkedIn profile scraping using BrightData API with fallback.
+        """
+        logger.info(f"🔍 Attempting to scrape LinkedIn profile: {linkedin_url}")
+        
+        # First, try BrightData API
+        if BRIGHTDATA_API_TOKEN:
+            logger.info("🚀 Using BrightData WebScraper API...")
+            brightdata_result = await self.brightdata_scraper.scrape_linkedin_profile(linkedin_url)
+            
+            if 'error' not in brightdata_result:
+                logger.info("✅ BrightData scraping successful")
+                return self._process_brightdata_result(brightdata_result)
+            else:
+                logger.warning(f"⚠️ BrightData scraping failed: {brightdata_result['error']}")
+        
+        # Fallback to basic scraping
+        logger.info("🔄 Falling back to basic scraping...")
+        basic_result = await self.scrape_linkedin_profile_basic(linkedin_url)
+        
+        if 'error' not in basic_result:
+            return basic_result
+        
+        # Final fallback to mock data
+        logger.warning("⚠️ All scraping methods failed. Using demonstration data...")
+        return await self.create_mock_linkedin_data(linkedin_url)
+    
+    def _process_brightdata_result(self, brightdata_result: Dict[str, Any]) -> Dict[str, Any]:
+        """Process and normalize BrightData scraping result."""
+        try:
+            data = brightdata_result.get('data', {})
+            username = self.extract_linkedin_username(brightdata_result.get('url', ''))
+            
+            processed_data = {
+                'url': brightdata_result.get('url'),
+                'username': username,
+                'name': data.get('name', 'N/A'),
+                'headline': data.get('headline', 'N/A'),
+                'location': data.get('location', 'N/A'),
+                'connections': data.get('connections', 'N/A'),
+                'about': data.get('about', 'N/A'),
+                'experience': data.get('experience', []),
+                'education': data.get('education', []),
+                'skills': data.get('skills', []),
+                'extracted_at': brightdata_result.get('extracted_at'),
+                'status': 'success_brightdata',
+                'method': 'brightdata_api'
+            }
+            
+            return processed_data
+            
+        except Exception as e:
+            logger.error(f"Error processing BrightData result: {e}")
+            return {'error': f'Failed to process BrightData result: {str(e)}'}
     
     def extract_linkedin_username(self, linkedin_url: str) -> Optional[str]:
         """Extract LinkedIn username from URL."""
@@ -319,7 +460,7 @@ async def analyze_linkedin_profile(linkedin_url: str = None, resume_file_path: s
     print(f"URL: {primary_linkedin}")
     
     # Attempt to scrape profile (will likely be limited)
-    profile_data = await scraper.scrape_linkedin_profile_basic(primary_linkedin)
+    profile_data = await scraper.scrape_linkedin_profile_enhanced(primary_linkedin)
     
     # If scraping fails or is limited, use mock data for demonstration
     if profile_data.get('error') or profile_data.get('status') == 'partially_extracted':

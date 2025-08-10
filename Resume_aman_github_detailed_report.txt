@@ -1,0 +1,33 @@
+🔍 DETAILED GITHUB ANALYSIS REPORT
+============================================================
+Resume File: d:\Work\Virtual_house\Virtual__house\AgentForce_Hackthon\agents\Resume_pdf_file\Resume_aman.pdf
+Analysis Date: 2025-08-10 15:39:23
+
+📊 SUMMARY:
+• Total GitHub links found: 3
+• Profiles analyzed: 1
+• Repositories analyzed: 1
+• Unique users: 1
+
+👤 GITHUB PROFILES:
+
+📋 kardwalker
+   Name: None
+   Public Repos: 10
+   Followers: 0
+   Following: 7
+
+📂 REPOSITORIES:
+
+📁 kardwalker/fine-tuning-a-pretrained-model
+   Description: No description available
+   Language: Jupyter Notebook
+   Stars: 1
+   Forks: 0
+   Last Updated: 2025-06-01T18:29:41Z
+
+⚠️ ERRORS ENCOUNTERED:
+   • Repository error: Repository "kardwalker/Malaria-model" not found
+
+============================================================
+End of Report
